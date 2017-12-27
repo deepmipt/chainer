@@ -1,0 +1,44 @@
+{
+  "pipe": [
+    {
+      "component": "tokenizer.spacy",
+      "in": ["text"],
+      "out": ["tokens"]
+    },
+    {
+      "id": "tokens_vocab",
+      "component": "vocab",
+      "load": "./tmp/vocabs/ner.tokens.vocab.txt",
+      "in": ["tokens"],
+      "out": ["tokens_idx"]
+    },
+    {
+      "id": "tags_vocab",
+      "component": "vocab",
+      "load": "./tmp/vocabs/ner.tags.vocab.txt"
+    },
+    {
+      "component": "tokenizer.chars",
+      "in": ["tokens"],
+      "out": ["chars"]
+    },
+    {
+      "id": "chars_vocab",
+      "component": "vocab",
+      "load": "./tmp/vocabs/ner.chars.vocab.txt",
+      "in": ["chars"],
+      "out": ["chars_idx"]
+    },
+    {
+      "component": "ner",
+      "load": "./tmp/models/ner",
+      "init": {
+        "tokens_vocab": "tokens_vocab",
+        "tags_vocab": "tags_vocab",
+        "chars_vocab": "chars_vocab",
+      },
+      "in": ["tokens_idx", "chars_idx"],
+      "out": ["tags"]
+    }
+  ]
+}

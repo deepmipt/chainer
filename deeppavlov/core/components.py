@@ -67,9 +67,15 @@ class Component(Registrable):
         pass
 
     def train(self, shared_mem, add_local_mem=False):
-        self.forward(shared_mem, add_local_mem)
+        pass
 
     def save(self):
+        pass
+
+    def load(self):
+        pass
+
+    def shutdown(self):
         pass
 
     def setup(self, components={}):
@@ -100,9 +106,11 @@ class DatasetProviderWrapper(Component):
     def _read_data(self):
         return self.reader_cls().read(self.data_path) if self.data_path is not None else self.reader_cls.read()
 
+    @overrides
     def forward(self, shared_mem, add_local_mem=False):
         self.train(shared_mem, add_local_mem=add_local_mem)
 
+    @overrides
     def train(self, shared_mem, add_local_mem=False):
         epoch = shared_mem["epoch"]
         if epoch > self.current_epoch:
@@ -131,51 +139,62 @@ class Pipeline(Component):
         for component_config in self.config['pipe']:
             self.pipeline.append(init_component(component_config))
 
+    def prepare_pipeline(self):
+        pipe = []
+        for c in self.pipeline:
+            if isinstance(c, TrainPipeline):
+                c.train({})
+                c.save()
+                pipe.append(c.get_trained_component())
+            else:
+                pipe.append(c)
+        self.pipeline = pipe
+
+    @overrides
     def forward(self, shared_mem, add_local_mem=False, train=False):
-        local_mem = {}
-        for input_key, input_alias in zip(self.inputs, self.inputs_alias):
-            local_mem[input_key] = shared_mem[input_alias]
-
-        if add_local_mem:
-            shared_mem[self.__repr__()] = local_mem
-
+        self.prepare_pipeline()
+        self.setup()
         for c in self.pipeline:
             if not c.disable:
-                if train:
-                    c.train(local_mem, add_local_mem=add_local_mem)
-                else:
-                    c.forward(local_mem, add_local_mem=add_local_mem)
-
-        for output_key, output_alias in zip(self.outputs, self.outputs_alias):
-            shared_mem[output_alias] = local_mem[output_key]
+                c.forward(shared_mem, add_local_mem=add_local_mem)
 
     @overrides
     def setup(self, components={}):
-        super().setup(components)
-
+        comps = {}
         for c in self.pipeline:
-            c.setup({**self._components, **self._setup})
+            if "id" in c.config:
+                comps.update({c.config["id"]: c})
+        for c in self.pipeline:
+            c.setup({**components, **comps})
 
+    @overrides
     def train(self, shared_mem, add_local_mem=False):
         raise NotImplementedError
 
+    @overrides
     def save(self):
         for c in self.pipeline:
             c.save()
+
+    @overrides
+    def load(self):
+        for c in self.pipeline:
+            c.load()
+
+    @overrides
+    def shutdown(self):
+        for c in self.pipeline:
+            c.shutdown()
 
 
 class TrainPipeline(Pipeline):
     def __init__(self, config):
         super().__init__(config)
 
+    @overrides
     def train(self, shared_mem, add_local_mem=False):
         self.prepare_pipeline()
-
-        components = {}
-        for c in self.pipeline:
-            if "id" in c.config:
-                components.update({c.config["id"]: c})
-        self.setup(components=components)
+        self.setup()
 
         n = int(self.config["train"]["num_epochs"])
         local_mem = {}
@@ -202,22 +221,6 @@ class TrainPipeline(Pipeline):
         if "id" in self.config:
             cmp.config["id"] = self.config["id"]
         return cmp
-
-    def prepare_pipeline(self):
-        pipe = []
-        for c in self.pipeline:
-            if isinstance(c, TrainPipeline):
-                c.train({})
-                c.save()
-                pipe.append(c.get_trained_component())
-            else:
-                pipe.append(c)
-        self.pipeline = pipe
-
-    @overrides
-    def setup(self, components={}):
-        for c in self.pipeline:
-            c.setup(components)
 
 
 def read_configuration(file):

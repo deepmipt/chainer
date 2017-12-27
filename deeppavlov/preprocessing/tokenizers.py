@@ -25,7 +25,7 @@ def spacy_tokenizer(x):
 
     def _tokenize(text, **kwargs):
         """Tokenize with spacy, placing service words as individual tokens."""
-        return [t.text for t in self.NLP.tokenizer(text)]
+        return [t.text for t in NLP.tokenizer(text)]
 
     def _detokenize(tokens):
         """

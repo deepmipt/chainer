@@ -45,3 +45,4 @@ class TestTrain(DPTestCase):
         assert os.path.exists("./tmp/models/ner.index")
         assert os.path.exists("./tmp/models/ner.meta")
         assert os.path.exists("./tmp/models/checkpoint")
+        cmp.shutdown()

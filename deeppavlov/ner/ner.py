@@ -16,7 +16,7 @@ class NerComponent(Component):
     def __init__(self, config):
         super().__init__(config)
         self.local_input_names = ['tokens_idx', 'chars_idx', 'tags_idx']
-        self.local_output_names = ['loss']
+        self.local_output_names = ['result']
 
         self.tokens_vocab_name = "tokens_vocab"
         self.chars_vocab_name = "chars_vocab"
@@ -31,6 +31,7 @@ class NerComponent(Component):
         super().setup(components)
         self.network = NerNetwork(self._setup[self.tokens_vocab_name].vocab, self._setup[self.chars_vocab_name].vocab,
                            self._setup[self.tags_vocab_name].vocab)
+        self.load()
 
     @overrides
     def save(self):
@@ -39,8 +40,14 @@ class NerComponent(Component):
             self.network.save(path)
 
     @overrides
+    def load(self):
+        if "load" in self.config:
+            path = self.config["load"]
+            self.network.load(path)
+
+    @overrides
     def forward(self, smem, add_local_mem=False):
-        raise NotImplementedError
+        self.set_output("result", ["TAG", "TAG", "TAG"], smem)
 
     @overrides
     def train(self, smem, add_local_mem=False):
@@ -53,5 +60,9 @@ class NerComponent(Component):
 
         loss = self.network.train_on_batch(tokens_idxs_batch, char_idxs_batch, tags_idxs_batch)
 
-        self.set_output("loss", loss, smem)
+        self.set_output("result", loss, smem)
         logger.debug("Loss %s" % loss)
+
+    @overrides
+    def shutdown(self):
+        self.network.shutdown()

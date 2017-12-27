@@ -341,3 +341,4 @@ class NerNetwork:
 
     def shutdown(self):
         self._sess.close()
+        tf.reset_default_graph()

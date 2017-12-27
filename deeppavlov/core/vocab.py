@@ -113,9 +113,10 @@ class VocabComponent(Component):
 
     @overrides
     def forward(self, smem, add_local_mem=False):
-        samples = self.get_input("tokens", smem)
-        result = self.vocab.process(samples)
-        self.set_output("idxs", result, smem)
+        if len(self.inputs) > 0 and len(self.outputs) > 0:
+            samples = self.get_input("tokens", smem)
+            result = self.vocab.process(samples)
+            self.set_output("idxs", result, smem)
 
     @overrides
     def train(self, smem, add_local_mem=False):
@@ -129,3 +130,14 @@ class VocabComponent(Component):
             import os
             os.makedirs(os.path.dirname(path), exist_ok=True)
             self.vocab.save(path)
+
+    @overrides
+    def load(self):
+        if "load" in self.config:
+            path = self.config["load"]
+            self.vocab.update_dict(self.vocab.load(path))
+
+    @overrides
+    def setup(self, components={}):
+        super().setup(components)
+        self.load()
