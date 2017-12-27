@@ -48,7 +48,7 @@ class Component(Registrable):
             return self._get_inputs()
 
     def _get_component_id(self):
-        return self.config["name"] if "name" in self.config else None
+        return self.config["id"] if "id" in self.config else None
 
     def _get_input_by_idx(self, idx, shared_mem):
         return shared_mem[self.inputs[idx]]
