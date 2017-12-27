@@ -1,0 +1,1 @@
+from deeppavlov.ner.ner import NerComponent

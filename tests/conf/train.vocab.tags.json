@@ -1,0 +1,21 @@
+{
+  "pipe": [
+    {
+      "component": "provider.ner.dstc2",
+      "config": "./conf/provider.ner.dstc2.json",
+      "in": [],
+      "out": ["tokens", "tags"]
+    },
+    {
+      "component": "vocab",
+      "config": {
+        "save_to": "./tmp/vocabs/ner.tags.vocab.txt"
+      },
+      "in": ["tags"],
+      "out": []
+    }
+  ],
+  "train": {
+    "num_epochs": 1
+  }
+}

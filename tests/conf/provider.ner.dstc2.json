@@ -1,0 +1,10 @@
+{
+  "params": {
+    "reader": "deeppavlov.data.dstc2.DSTC2Reader",
+    "data_path": "/tmp/deeppavlov/",
+    "batch_size": 10,
+    "seed": 1,
+    "data_type": "train",
+    "slot_values": "/home/aleksandr/Downloads/slot_vals.json",
+  }
+}

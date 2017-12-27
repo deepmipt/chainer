@@ -1,0 +1,53 @@
+{
+  "pipe": [
+    {
+      "component": "provider.ner.dstc2",
+      "config": "./conf/provider.ner.dstc2.json",
+      "in": [],
+      "out": ["tokens", "tags"]
+    },
+    {
+      "id": "tokens_vocab",
+      "component": "vocab",
+      "config": "./conf/train.vocab.tokens.json",
+      "in": ["tokens"],
+      "out": ["tokens_idx"]
+    },
+    {
+      "id": "tags_vocab",
+      "component": "vocab",
+      "config": "./conf/train.vocab.tags.json",
+      "in": ["tags"],
+      "out": ["tags_idx"]
+    },
+    {
+      "component": "tokenizer.chars",
+      "config": {},
+      "in": ["tokens"],
+      "out": ["chars"]
+    },
+    {
+      "id": "chars_vocab",
+      "component": "vocab",
+      "config": "./conf/train.vocab.chars.json",
+      "in": ["chars"],
+      "out": ["chars_idx"]
+    },
+    {
+      "component": "ner",
+      "config": {
+        "save_to": "./tmp/models/ner"
+      },
+      "init": {
+        "tokens_vocab": "tokens_vocab",
+        "tags_vocab": "tags_vocab",
+        "chars_vocab": "chars_vocab",
+      },
+      "in": ["tokens_idx", "chars_idx", "tags_idx"],
+      "out": ["loss"]
+    }
+  ],
+  "train": {
+    "num_epochs": 1
+  }
+}

@@ -1,0 +1,4 @@
+pyhocon==0.3.38
+spacy==2.0.5
+overrides==1.9
+tensorflow==1.4.1

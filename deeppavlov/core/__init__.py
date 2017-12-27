@@ -1,0 +1,1 @@
+from deeppavlov.core.vocab import VocabComponent
