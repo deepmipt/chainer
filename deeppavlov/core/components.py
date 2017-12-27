@@ -83,14 +83,14 @@ class DatasetProviderWrapper(Component):
     def __init__(self, config):
         super().__init__(config)
 
-        self.data_path = self.config["params"]["data_path"] if "data_path" in self.config["params"] else None
-        self.batch_size = self.config["params"]["batch_size"] if "batch_size" in self.config["params"] else -1
-        self.data_type = self.config["params"]["data_type"] if "data_type" in self.config["params"] else 'train'
-        self.seed = self.config["params"]["seed"] if "seed" in self.config["params"] else 1
+        self.data_path = self.config["data_path"] if "data_path" in self.config else None
+        self.batch_size = self.config["batch_size"] if "batch_size" in self.config else -1
+        self.data_type = self.config["data_type"] if "data_type" in self.config else 'train'
+        self.seed = self.config["seed"] if "seed" in self.config else 1
 
-        self.reader_cls = load_cls(self.config["params"]["reader"])
+        self.reader_cls = load_cls(self.config["reader"])
 
-        self.provider_cls = self.config["params"]["provider"]
+        self.provider_cls = self.config["provider"]
 
         self.provider = self.provider_cls(self._read_data(), self.seed)
         self.generator = self.provider.batch_generator(self.batch_size, self.data_type)
@@ -234,6 +234,9 @@ def load_cls(cls):
 
 
 def init_component(cfg):
+    # if ("train" not in cfg) and ("pipe" not in cfg) and ("config" not in cfg):
+    #     cfg["config"] = {}
+
     if "config" in cfg:
         if isinstance(cfg["config"], str):
             cfg_upd = read_configuration(cfg["config"])
@@ -244,11 +247,15 @@ def init_component(cfg):
 
         del cfg_copy["config"]
 
-        if "in" in cfg_copy:
-            cfg_copy["in_alias"] = cfg_copy["in"]
+        if "in" not in cfg_copy:
+            cfg_copy["in"] = []
 
-        if "out" in cfg_copy:
-            cfg_copy["out_alias"] = cfg_copy["out"]
+        cfg_copy["in_alias"] = cfg_copy["in"]
+
+        if "out" not in cfg_copy:
+            cfg_copy["out"] = []
+
+        cfg_copy["out_alias"] = cfg_copy["out"]
 
         cfg_upd.update(cfg_copy)
         return init_component(cfg_upd)
@@ -260,7 +267,7 @@ def init_component(cfg):
         else:
             cls = get_component_class(cfg)
             if issubclass(cls, DatasetProvider):
-                cfg["params"]["provider"] = cls
+                cfg["provider"] = cls
                 return DatasetProviderWrapper(cfg)
             else:
                 return cls(cfg)

@@ -3,7 +3,6 @@
     {
       "component": "provider.ner.dstc2",
       "config": "./conf/provider.ner.dstc2.json",
-      "in": [],
       "out": ["tokens", "tags"]
     },
     {
@@ -11,8 +10,7 @@
       "config": {
         "save_to": "./tmp/vocabs/ner.tokens.vocab.txt"
       },
-      "in": ["tokens"],
-      "out": []
+      "in": ["tokens"]
     }
   ],
   "train": {

@@ -6,7 +6,7 @@ class TestUtils(DPTestCase):
 
     def test_read_config(self):
         cfg = read_configuration("./conf/provider.ner.dstc2.json")
-        assert cfg["params.batch_size"] == 10
+        assert cfg["batch_size"] == 10
 
     def test_init_component(self):
         cfg = read_configuration("./conf/train.ner.json")
