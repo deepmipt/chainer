@@ -14,3 +14,20 @@ class TestTrain(DPTestCase):
         cmp.forward(smem)
         assert "tags" in smem
         cmp.shutdown()
+
+    def test_bow_infer(self):
+        cfg = read_configuration("./conf/infer.bow.json")
+        cmp = init_component(cfg)
+        smem = {"text": "Билл Гейтс президент компании Майкрософт открыл новый офис в Москве"}
+        cmp.forward(smem)
+        assert "bow" in smem
+        cmp.shutdown()
+
+    def test_w2v_infer(self):
+        cfg = read_configuration("./conf/infer.w2v.json")
+        cmp = init_component(cfg)
+        smem = {"text": "Билл Гейтс президент компании Майкрософт открыл новый офис в Москве"}
+        cmp.forward(smem)
+        assert "emb" in smem
+        cmp.shutdown()
+

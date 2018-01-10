@@ -46,3 +46,11 @@ class TestTrain(DPTestCase):
         assert os.path.exists("./tmp/models/ner.meta")
         assert os.path.exists("./tmp/models/checkpoint")
         cmp.shutdown()
+
+    def test_train_w2v(self):
+        cfg = read_configuration("./conf/train.w2v.json")
+        cmp = init_component(cfg)
+        cmp.train({})
+        cmp.save()
+        assert os.path.exists("./tmp/emb/w2v.text8.bin")
+        cmp.shutdown()

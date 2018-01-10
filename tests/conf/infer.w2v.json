@@ -1,0 +1,10 @@
+{
+  "pipe": [
+    {
+      "component": "w2v",
+      "load": "./tmp/emb/w2v.text8.bin",
+      "in": ["text"],
+      "out": ["emb"]
+    }
+  ]
+}

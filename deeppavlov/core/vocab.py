@@ -141,3 +141,22 @@ class VocabComponent(Component):
     def setup(self, components={}):
         super().setup(components)
         self.load()
+
+
+@Registrable.register("bow")
+class BowComponent(VocabComponent):
+    def __init__(self, config):
+        super().__init__(config)
+        self.local_input_names = ['utterance']
+        self.local_output_names = ['bow']
+
+    @overrides
+    def forward(self, smem, add_local_mem=False):
+        if len(self.inputs) > 0 and len(self.outputs) > 0:
+            utterance = self.get_input("utterance", smem)
+            bow = np.zeros([len(self.vocab)], dtype=np.int32)
+            for word in utterance.split(' '):
+                if word in self.vocab:
+                    idx = self.vocab.index(word)
+                    bow[idx] += 1
+            self.set_output("bow", bow, smem)

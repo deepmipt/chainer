@@ -1,0 +1,14 @@
+{
+  "pipe": [
+    {
+      "component": "w2v",
+      "config": {
+        "save_to": "./tmp/emb/w2v.text8.bin",
+        "corpus": "./tmp/data/text8"
+      }
+    }
+  ],
+  "train": {
+    "num_epochs": 1
+  }
+}

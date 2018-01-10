@@ -1,0 +1,10 @@
+{
+  "pipe": [
+    {
+      "component": "bow",
+      "load": "./tmp/vocabs/ner.tokens.vocab.txt",
+      "in": ["text"],
+      "out": ["bow"]
+    }
+  ]
+}

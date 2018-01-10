@@ -203,12 +203,16 @@ class TrainPipeline(Pipeline):
             local_mem["epoch"] = e
             pipe = self.pipeline[:-1]
             trained = self.pipeline[-1]
-            try:
-                while True:
-                    for c in pipe:
-                        c.forward(local_mem, add_local_mem=add_local_mem)
-                    trained.train(local_mem, add_local_mem=add_local_mem)
-            except StopIteration:
+            if len(pipe) > 0:
+                try:
+                    while True:
+                        for c in pipe:
+                            c.forward(local_mem, add_local_mem=add_local_mem)
+                        trained.train(local_mem, add_local_mem=add_local_mem)
+                except StopIteration:
+                    logger.info("End of epoch %s" % e)
+            else:
+                trained.train(local_mem, add_local_mem=add_local_mem)
                 logger.info("End of epoch %s" % e)
         self.save()
 
