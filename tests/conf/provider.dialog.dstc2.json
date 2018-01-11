@@ -1,0 +1,7 @@
+{
+  "reader": "deeppavlov.data.dstc2.DSTC2Reader",
+  "data_path": "/tmp/deeppavlov/",
+  "batch_size": 1,
+  "seed": 1,
+  "data_type": "train"
+}

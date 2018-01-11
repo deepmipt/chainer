@@ -1,5 +1,5 @@
 from deeppavlov.testing.test_case import DPTestCase
-from deeppavlov.data.dstc2 import DSTC2Reader, DSTC2NerProvider
+from deeppavlov.data.dstc2 import DSTC2Reader, DSTC2NerProvider, DSTC2DialogProvider
 from deeppavlov.core.registrable import Registrable
 
 
@@ -26,7 +26,15 @@ class TestDSTC2(DPTestCase):
             }
         }
 
-    def test_dstc2provider(self):
+    def test_dstc2_ner_dataset(self):
+        ds = Registrable.by_name("provider.ner.dstc2")
+        self.assertIsInstance(ds, DSTC2NerProvider.__class__)
+
+    def test_dstc2_dialog_dataset(self):
+        ds = Registrable.by_name("provider.dialog.dstc2")
+        self.assertIsInstance(ds, DSTC2DialogProvider.__class__)
+
+    def test_dstc2_ner_provider(self):
         data = DSTC2Reader.read(data_path=self.TEST_DIR)
         provider = DSTC2NerProvider(data, 1)
         batches = provider.batch_generator(10)
@@ -36,7 +44,13 @@ class TestDSTC2(DPTestCase):
             'tags': (['O'], ['O', 'O', 'O', 'O'], [], [], ['O'], ['O', 'O', 'O', 'O'], [], [], ['O', 'O', 'O', 'O'], ['O', 'O', 'O', 'O', 'B-pricerange', 'O', 'O', 'O', 'B-area', 'O', 'O', 'O'])
         }
 
-    def test_dstc2_ner_dataset(self):
-        ds = Registrable.by_name("provider.ner.dstc2")
-        self.assertIsInstance(ds, DSTC2NerProvider.__class__)
-
+    def test_dstc2_dialog_provider(self):
+        data = DSTC2Reader.read(data_path=self.TEST_DIR)
+        provider = DSTC2DialogProvider(data, 1)
+        batches = provider.batch_generator(10)
+        batch = next(batches)
+        assert batch == {
+            "text": '',
+            "response": 'Hello, welcome to the Cambridge restaurant system. You can ask for restaurants by area, price range or food type. How may I help you?',
+            "other": {'act': 'welcomemsg', 'episode_done': True}
+        }

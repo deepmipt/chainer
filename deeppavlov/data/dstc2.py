@@ -18,6 +18,9 @@ import json
 import logging
 from overrides import overrides
 import os
+import random
+import itertools
+
 from deeppavlov.data.utils import is_done, mark_done, download_untar, download
 
 from deeppavlov.core.data import DatasetReader, DatasetProvider
@@ -97,6 +100,7 @@ class DSTC2Reader(DatasetReader):
 @Registrable.register("provider.ner.dstc2")
 class DSTC2NerProvider(DatasetProvider):
 
+    @overrides
     def __init__(self, data, seed):
         r""" Dataset takes a dict with fields 'train', 'test', 'valid'. A list of samples (pairs x, y) is stored
              in each field.
@@ -170,3 +174,58 @@ class DSTC2NerProvider(DatasetProvider):
                 "tokens": x_batch,
                 "tags": y_batch
             }
+
+
+@Registrable.register("provider.dialog.dstc2")
+class DSTC2DialogProvider(DatasetProvider):
+
+    @overrides
+    def __init__(self, data, seed, *args, **kwargs):
+        super().__init__(data, seed)
+
+        def _wrap(turn):
+            if isinstance(turn, list):
+                turn[0]['context']['episode_done'] = True
+                return list(map(_wrap, turn))
+            else:
+                x = turn['context']['text']
+                y = turn['response']['text']
+                other = dict()
+                other['act'] = turn['response']['act']
+                if turn['context'].get('db_result') is not None:
+                    other['db_result'] = turn['context']['db_result']
+                if turn['context'].get('episode_done'):
+                    other['episode_done'] = True
+                return x, y, other
+
+        self.train = list(map(_wrap, data.get('train', [])))
+        self.valid = list(map(_wrap, data.get('valid', [])))
+        self.test = list(map(_wrap, data.get('test', [])))
+        self.split(*args, **kwargs)
+        self.data = {
+            'train': self.train,
+            'valid': self.valid,
+            'test': self.test,
+            'all': self.train + self.test + self.valid
+        }
+
+    @overrides
+    def batch_generator(self, batch_size, data_type='train', shuffle=True):
+        # Ignore batch_size for now
+        for sample in self.data[data_type]:
+            for utterance in sample:
+                yield {
+                    "text": utterance[0],
+                    "response": utterance[1],
+                    "other": utterance[2]
+                }
+
+    @overrides
+    def iter_all(self, data_type: str = 'train'):
+        for sample in self.data[data_type]:
+            for utterance in sample:
+                yield {
+                    "text": utterance[0],
+                    "response": utterance[1],
+                    "other": utterance[2]
+                }
