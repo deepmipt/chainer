@@ -94,7 +94,7 @@ class Vocabulary:
         with open(dict_file_path) as f:
             for line in f:
                 if len(line) > 0:
-                    tokens.append(line)
+                    tokens.append(line.strip())
         return tokens
 
     def save(self, path):
@@ -147,16 +147,16 @@ class VocabComponent(Component):
 class BowComponent(VocabComponent):
     def __init__(self, config):
         super().__init__(config)
-        self.local_input_names = ['utterance']
+        self.local_input_names = ['tokens']
         self.local_output_names = ['bow']
 
     @overrides
     def forward(self, smem, add_local_mem=False):
         if len(self.inputs) > 0 and len(self.outputs) > 0:
-            utterance = self.get_input("utterance", smem)
+            tokens = self.get_input("tokens", smem)
             bow = np.zeros([len(self.vocab)], dtype=np.int32)
-            for word in utterance.split(' '):
+            for word in tokens:
                 if word in self.vocab:
-                    idx = self.vocab.index(word)
+                    idx = self.vocab.tok2idx(word)
                     bow[idx] += 1
             self.set_output("bow", bow, smem)

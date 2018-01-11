@@ -1,9 +1,14 @@
 {
   "pipe": [
     {
+      "component": "tokenizer.spacy",
+      "in": ["text"],
+      "out": ["tokens"]
+    },
+    {
       "component": "bow",
       "load": "./tmp/vocabs/ner.tokens.vocab.txt",
-      "in": ["text"],
+      "in": ["tokens"],
       "out": ["bow"]
     }
   ]
