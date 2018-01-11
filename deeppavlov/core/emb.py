@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class W2VEmbComponent(Component):
     def __init__(self, config):
         super().__init__(config)
-        self.local_input_names = ['utterance']
+        self.local_input_names = ['tokens']
         self.local_output_names = ['emb']
         self.corpus = self.config["corpus"] if "corpus" in self.config else None
         self.dim = self.config["dim"] if "dim" in self.config else 300
@@ -22,8 +22,8 @@ class W2VEmbComponent(Component):
     @overrides
     def forward(self, smem, add_local_mem=False):
         if len(self.inputs) > 0 and len(self.outputs) > 0:
-            utterance = self.get_input("utterance", smem)
-            result = self.emb.infer(utterance)
+            tokens = self.get_input("tokens", smem)
+            result = self.emb.infer(tokens)
             self.set_output("emb", result, smem)
 
     @overrides
@@ -55,8 +55,8 @@ class UtteranceEmbed():
         self.dim = dim
         self.model = None
 
-    def _encode(self, utterance):
-        embs = [self.model[word] for word in utterance.split(' ') if word and word in self.model]
+    def _encode(self, tokens):
+        embs = [self.model[word] for word in tokens if word and word in self.model]
         # average of embeddings
         if len(embs):
             return np.mean(embs, axis=0)
@@ -70,8 +70,8 @@ class UtteranceEmbed():
         self.model = model
         return model
 
-    def infer(self, utterance):
-        return self._encode(utterance)
+    def infer(self, tokens):
+        return self._encode(tokens)
 
     def load(self, path):
         print(':: model loaded from path %s' % path)

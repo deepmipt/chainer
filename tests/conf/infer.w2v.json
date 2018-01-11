@@ -1,9 +1,14 @@
 {
   "pipe": [
     {
+      "component": "tokenizer.spacy",
+      "in": ["text"],
+      "out": ["tokens"]
+    },
+    {
       "component": "w2v",
       "load": "./tmp/emb/w2v.text8.bin",
-      "in": ["text"],
+      "in": ["tokens"],
       "out": ["emb"]
     }
   ]
