@@ -182,10 +182,24 @@ class NerNetwork:
         saver = tf.train.Saver()
         saver.restore(self._sess, model_file_path)
 
-    def train_on_batch(self, tokens_idxs_batch, char_idxs_batch, tags_idxs_batch):
+    def infer(self, tokens_batch, chars_batch):
+        tokens_idxs_batch = self.tokens_vocab.process(tokens_batch)
+        char_idxs_batch = self.chars_vocab.process(chars_batch)
+        prediction_batch = self.predict_on_batch(tokens_idxs_batch, char_idxs_batch)
+        if prediction_batch is not None:
+            result_batch = self.tags_vocab.batch_idxs2batch_toks(prediction_batch)
+        else:
+            result_batch = None
+        return result_batch
+
+    def _prepare_batch(self, tokens_idxs_batch, char_idxs_batch, tags_idxs_batch):
         batch_size = len(tokens_idxs_batch)
 
         max_utterance_len = max(len(utt) for utt in tokens_idxs_batch)
+
+        if max_utterance_len == 0:
+            return None, None, None, None
+
         max_token_len = max(len(token) for token in list(chain(*char_idxs_batch)))
 
         tokens_batch_np = np.zeros([batch_size, max_utterance_len], dtype=np.int32)
@@ -194,13 +208,21 @@ class NerNetwork:
         chars_batch_np = np.zeros([batch_size, max_utterance_len, max_token_len], dtype=np.int32)
         for n in range(batch_size):
             tokens_idxs = tokens_idxs_batch[n]
-            tags_idxs = tags_idxs_batch[n]
+            if tags_idxs_batch is not None:
+                tags_idxs = tags_idxs_batch[n]
             tokens_batch_np[n, :len(tokens_idxs)] = tokens_idxs
             mask_np[n, :len(tokens_idxs)] = 1
-            tags_batch_np[n, :len(tags_idxs)] = tags_idxs
+            if tags_idxs_batch is not None:
+                tags_batch_np[n, :len(tags_idxs)] = tags_idxs
             for k in range(len(tokens_idxs)):
                 characters = char_idxs_batch[n][k]
                 chars_batch_np[n, k, :len(characters)] = characters
+        return tokens_batch_np, chars_batch_np, mask_np, tags_batch_np
+
+    def train_on_batch(self, tokens_idxs_batch, char_idxs_batch, tags_idxs_batch):
+        tokens_batch_np, chars_batch_np, mask_np, tags_batch_np = self._prepare_batch(tokens_idxs_batch, char_idxs_batch, tags_idxs_batch)
+        if tokens_batch_np is None:
+            return None
         loss = self.train(tokens_batch_np, chars_batch_np, mask_np, tags_batch_np)
         return loss
 
@@ -262,6 +284,13 @@ class NerNetwork:
         else:
             results = self.eval_conll(dataset_type='test', short_report=True)
         return results
+
+    def predict_on_batch(self, tokens_idxs_batch, char_idxs_batch):
+        tokens_batch_np, chars_batch_np, mask_np, tags_batch_np = self._prepare_batch(tokens_idxs_batch, char_idxs_batch, None)
+        if tokens_batch_np is None:
+            return None
+        prediction = self.predict(tokens_batch_np, chars_batch_np)
+        return prediction
 
     def predict(self, x_word, x_char):
         feed_dict = self._fill_feed_dict(x_word, x_char, training=False)
