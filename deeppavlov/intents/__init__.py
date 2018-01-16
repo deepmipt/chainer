@@ -1,0 +1,1 @@
+from deeppavlov.intents.intents import IntentsComponent
