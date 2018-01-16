@@ -36,3 +36,11 @@ class TestInfer(DPTestCase):
         assert "emb" in smem
         cmp.shutdown()
 
+    def test_intents_infer(self):
+        cfg = read_configuration("./conf/infer.intents.json")
+        cmp = init_component(cfg)
+        smem = {"text": "cheap restaurant in Moscow"}
+        cmp.forward(smem)
+        assert "classes" in smem
+        cmp.shutdown()
+

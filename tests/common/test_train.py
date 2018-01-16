@@ -1,7 +1,9 @@
 from deeppavlov.testing.test_case import DPTestCase
 from deeppavlov.core.components import read_configuration, init_component
 from deeppavlov.core.vocab import VocabComponent
-import deeppavlov.ner
+from deeppavlov.skills.hcn import HcnComponent
+from deeppavlov.intents.intents import IntentsComponent
+from deeppavlov.ner.ner import  NerComponent
 import os
 
 
@@ -54,3 +56,15 @@ class TestTrain(DPTestCase):
         cmp.save()
         assert os.path.exists("./tmp/emb/w2v.text8.bin")
         cmp.shutdown()
+
+    def test_intents_train(self):
+        cfg = read_configuration("./conf/train.intents.json")
+        cmp = init_component(cfg)
+        cmp.train({})
+        cmp.save()
+        tc = cmp.get_trained_component()
+        assert isinstance(tc, IntentsComponent)
+        cmp.shutdown()
+
+
+

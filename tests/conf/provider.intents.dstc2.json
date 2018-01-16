@@ -1,0 +1,15 @@
+{
+  "reader": "deeppavlov.data.dstc2.DSTC2Reader",
+  "data_path": "/tmp/deeppavlov/",
+  "batch_size": 1,
+  "data_type": "train",
+  "prep_method_name": "simple_prep",
+  "classes_file": "../data/dstc2/classes.txt",
+  "seed": 42,
+  "extract_classes": true,
+  "fields_to_merge": "train valid",
+  "merged_field": "train",
+  "field_to_split": "train",
+  "split_fields": "train valid",
+  "split_proportions": "0.9 0.1"
+}

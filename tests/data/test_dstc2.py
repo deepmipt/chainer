@@ -1,5 +1,5 @@
 from deeppavlov.testing.test_case import DPTestCase
-from deeppavlov.data.dstc2 import DSTC2Reader, DSTC2NerProvider, DSTC2DialogProvider
+from deeppavlov.data.dstc2 import DSTC2Reader, DSTC2NerProvider, DSTC2DialogProvider, DSTC2IntentsProvider
 from deeppavlov.core.registrable import Registrable
 
 
@@ -34,6 +34,10 @@ class TestDSTC2(DPTestCase):
         ds = Registrable.by_name("provider.dialog.dstc2")
         self.assertIsInstance(ds, DSTC2DialogProvider.__class__)
 
+    def test_dstc2_intent_dataset(self):
+        ds = Registrable.by_name("provider.intents.dstc2")
+        self.assertIsInstance(ds, DSTC2IntentsProvider.__class__)
+
     def test_dstc2_ner_provider(self):
         data = DSTC2Reader.read(data_path=self.TEST_DIR)
         provider = DSTC2NerProvider(data, 1)
@@ -54,3 +58,14 @@ class TestDSTC2(DPTestCase):
             "response": 'Hello, welcome to the Cambridge restaurant system. You can ask for restaurants by area, price range or food type. How may I help you?',
             "other": {'act': 'welcomemsg', 'episode_done': True}
         }
+
+    def test_dstc2_intents_provider(self):
+        data = DSTC2Reader.read(data_path=self.TEST_DIR)
+        provider = DSTC2IntentsProvider(data, 1)
+        batches = provider.batch_generator(1)
+        batch = next(batches)
+        assert batch == {
+            "text": ['cantonese food'],
+            "intents": [['inform_food']]
+        }
+
