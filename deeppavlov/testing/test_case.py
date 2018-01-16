@@ -14,4 +14,4 @@ class DPTestCase(TestCase):
         os.makedirs(self.TEST_DIR, exist_ok=True)
 
     def tearDown(self):
-        shutil.rmtree(self.TEST_DIR)
+        shutil.rmtree(self.TEST_DIR, ignore_errors=True)
