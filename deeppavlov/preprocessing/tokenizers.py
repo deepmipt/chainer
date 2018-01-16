@@ -4,8 +4,25 @@ import spacy
 import re
 
 import logging
+import nltk
 
 logger = logging.getLogger(__name__)
+
+
+def nltk_tokenizer(batch, tokenizer="wordpunct_tokenize"):
+        tokenized_batch = []
+
+        tokenizer_ = getattr(nltk.tokenize, tokenizer, None)
+        if callable(tokenizer_):
+            if type(batch) == str:
+                tokenized_batch = " ".join(tokenizer_(batch))
+            else:
+                # list of str
+                for text in batch:
+                    tokenized_batch.append(" ".join(tokenizer_(text)))
+            return tokenized_batch
+        else:
+            raise AttributeError("Tokenizer %s is not defined in nltk.tokenizer" % tokenizer)
 
 
 def char_tokenizer(tokens):
@@ -76,4 +93,17 @@ class SpacyTokenizerComponent(Component):
     def forward(self, shared_mem, add_local_mem=False):
         text = self.get_input('text', shared_mem)
         tokens = spacy_tokenizer(text)
+        self.set_output('tokens', tokens, shared_mem)
+
+
+@Registrable.register("tokenizer.nltk")
+class NLTKTokenizerComponent(Component):
+    def __init__(self, config):
+        super().__init__(config)
+        self.local_input_names = ['text']
+        self.local_output_names = ['tokens']
+
+    def forward(self, shared_mem, add_local_mem=False):
+        text = self.get_input('text', shared_mem)
+        tokens = nltk_tokenizer(text)
         self.set_output('tokens', tokens, shared_mem)
