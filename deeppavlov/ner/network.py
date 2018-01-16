@@ -25,13 +25,15 @@ from .layers import stacked_rnn
 from tensorflow.contrib.layers import xavier_initializer
 from itertools import chain
 
+from deeppavlov.core.tf_backend import TFModel
+
 
 SEED = 42
 MODEL_PATH = 'model/'
 MODEL_FILE_NAME = 'ner_model'
 
 
-class NerNetwork:
+class NerNetwork(TFModel):
 
     def __init__(self,
                  word_vocab,
@@ -369,5 +371,6 @@ class NerNetwork:
         return train_op
 
     def shutdown(self):
-        self._sess.close()
-        tf.reset_default_graph()
+        pass
+        # self._sess.close()
+        # tf.reset_default_graph()
