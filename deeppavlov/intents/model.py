@@ -208,6 +208,9 @@ class KerasMulticlassModel(KerasModel):
         if type(data) is str:
             features = self.texts2vec([data])
             preds = self.model.predict_on_batch(features)[0]
+        elif type(data) is list and len(data) == 0:
+            features = self.texts2vec([""])
+            preds = self.model.predict_on_batch(features)
         else:
             features = self.texts2vec(data)
             preds = self.model.predict_on_batch(features)
