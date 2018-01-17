@@ -41,7 +41,13 @@ class IntentsComponent(Component):
     def forward(self, smem, add_local_mem=False):
         tokens = self._get_input_by_idx(0, smem)
 
-        prediction = self.model.infer([tokens])
+        if tokens is None or len(tokens)==0:
+            prediction = None
+        else:
+            if isinstance(tokens, list):
+                prediction = self.model.infer(tokens)
+            else:
+                prediction = self.model.infer([tokens])
 
         self.set_output("result", prediction, smem)
 
