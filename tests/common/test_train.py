@@ -66,5 +66,12 @@ class TestTrain(DPTestCase):
         assert isinstance(tc, IntentsComponent)
         cmp.shutdown()
 
-
+    def test_hcn_train(self):
+        cfg = read_configuration("./conf/train.hcn.json")
+        cmp = init_component(cfg)
+        cmp.train({})
+        cmp.save()
+        tc = cmp.get_trained_component()
+        assert isinstance(tc, HcnComponent)
+        cmp.shutdown()
 

@@ -1,0 +1,65 @@
+{
+  "pipe": [
+    {
+      "component": "provider.dialog.dstc2",
+      "config": "./conf/provider.dialog.dstc2.json",
+      "out": ["text", "response", "other"]
+    },
+    {
+      "component": "tokenizer.spacy",
+      "in": ["text"],
+      "out": ["tokens"]
+    },
+    {
+      "component": "tokenizer.chars",
+      "in": ["tokens"],
+      "out": ["chars"]
+    },
+    {
+      "component": "bow",
+      "config": "./conf/train.vocab.bow.json",
+      "in": ["tokens"],
+      "out": ["bow"]
+    },
+    {
+      "component": "w2v",
+      "config": "./conf/train.w2v.json",
+      "in": ["tokens"],
+      "out": ["emb"]
+    },
+    {
+      "component": "ner",
+      "config": "./conf/train.ner.json",
+      "in": ["tokens", "chars"],
+      "out": ["entities"]
+    },
+    {
+      "component": "intents",
+      "config": "./conf/train.intents.json",
+      "in": ["tokens"],
+      "out": ["classes"]
+    },
+    {
+      "component": "hcn",
+      "config": {
+        "save_to": "./tmp/models/hcn",
+        "model_dir": "hcn_rnn",
+	    "model_file": "model",
+        "train_now": true,
+        "learning_rate": 0.03,
+        "hidden_dim": 128,
+        "obs_size": 829,
+        "use_action_mask": false,
+        "action_size": 45,
+        "intents_size": 27,
+        "template_path": "/tmp/deeppavlov/dstc2/dstc2-templates.txt",
+        "slot_names": ["pricerange", "this", "area", "slot", "food", "name"]
+      },
+      "in": ["bow", "emb", "entities", "classes", "response", "other"],
+      "out": ["loss"]
+    }
+  ],
+  "train": {
+    "num_epochs": 1
+  }
+}
