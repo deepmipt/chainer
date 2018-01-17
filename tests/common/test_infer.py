@@ -3,7 +3,7 @@ from deeppavlov.core.components import read_configuration, init_component
 from deeppavlov.core.vocab import VocabComponent
 import deeppavlov.ner
 import os
-
+from deeppavlov.intents.intents import IntentsComponent
 
 class TestInfer(DPTestCase):
 
@@ -40,6 +40,9 @@ class TestInfer(DPTestCase):
         cfg = read_configuration("./conf/infer.intents.json")
         cmp = init_component(cfg)
         smem = {"text": "cheap restaurant in Moscow"}
+        cmp.forward(smem)
+        assert "classes" in smem
+        smem = {"text": ""}
         cmp.forward(smem)
         assert "classes" in smem
         cmp.shutdown()
