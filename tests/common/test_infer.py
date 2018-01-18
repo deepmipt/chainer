@@ -47,3 +47,10 @@ class TestInfer(DPTestCase):
         assert "classes" in smem
         cmp.shutdown()
 
+    def test_hcn_infer(self):
+        cfg = read_configuration("./conf/infer.hcn.json")
+        cmp = init_component(cfg)
+        smem = {"text": "cheap restaurant in Moscow"}
+        cmp.forward(smem)
+        assert "action" in smem
+        cmp.shutdown()

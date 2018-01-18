@@ -41,7 +41,17 @@ class HcnComponent(Component):
 
     @overrides
     def forward(self, smem, add_local_mem=False):
-        self.set_output("result", {"act": "SOME ACT", "slots": "SOME SLOTS"}, smem)
+        bow = self.get_input("bow", smem)
+
+        emb = self.get_input("emb", smem)
+
+        entities = self.get_input("entities", smem)
+
+        classes = self.get_input("classes", smem)
+
+        result = self.hcn.infer_on_batch(bow, emb, entities, classes)
+
+        self.set_output("result", result, smem)
 
     @overrides
     def train(self, smem, add_local_mem=False):
@@ -319,6 +329,17 @@ class HybridCodeNetworkBot:
         else:
             print("\n:: stopping because max number of epochs encountered\n")
         self.save()
+
+    def infer_on_batch(self, bow, emb, entities, classes, db_result=None):
+        if db_result is not None:
+            self.db_result = db_result
+        probs, pred_id = self.network._forward(
+            self._encode_context(bow, emb, entities, classes, db_result),
+            self._action_mask()
+        )
+        self.prev_action *= 0.
+        self.prev_action[pred_id] = 1.
+        return pred_id
 
     def infer(self, context, db_result=None):
         if db_result is not None:
