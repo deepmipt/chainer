@@ -6,30 +6,9 @@
       "out": ["tokens", "tags"]
     },
     {
-      "id": "tokens_vocab",
-      "component": "vocab",
-      "config": "./conf/train.vocab.tokens.json",
-      "in": ["tokens"],
-      "out": ["tokens_idx"]
-    },
-    {
-      "id": "tags_vocab",
-      "component": "vocab",
-      "config": "./conf/train.vocab.tags.json",
-      "in": ["tags"],
-      "out": ["tags_idx"]
-    },
-    {
       "component": "tokenizer.chars",
       "in": ["tokens"],
       "out": ["chars"]
-    },
-    {
-      "id": "chars_vocab",
-      "component": "vocab",
-      "config": "./conf/train.vocab.chars.json",
-      "in": ["chars"],
-      "out": ["chars_idx"]
     },
     {
       "component": "ner",
@@ -37,11 +16,20 @@
         "save_to": "./tmp/models/ner"
       },
       "init": {
-        "tokens_vocab": "tokens_vocab",
-        "tags_vocab": "tags_vocab",
-        "chars_vocab": "chars_vocab",
+        "tokens_vocab": {
+          "component": "vocab",
+          "config": "./conf/train.vocab.tokens.json"
+        },
+        "tags_vocab":  {
+          "component": "vocab",
+          "config": "./conf/train.vocab.tags.json"
+        },
+        "chars_vocab": {
+          "component": "vocab",
+          "config": "./conf/train.vocab.chars.json"
+        }
       },
-      "in": ["tokens_idx", "chars_idx", "tags_idx"],
+      "in": ["tokens", "chars", "tags"],
       "out": ["loss"]
     }
   ],

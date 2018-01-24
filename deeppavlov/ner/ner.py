@@ -48,8 +48,8 @@ class NerComponent(Component):
 
     @overrides
     def forward(self, smem, add_local_mem=False):
-        tokens = self._get_input_by_idx(0, smem)
-        chars = self._get_input_by_idx(1, smem)
+        tokens = self.get_input("tokens", smem)
+        chars = self.get_input("chars", smem)
 
         prediction = self.network.infer([tokens], [chars])
 
@@ -60,9 +60,9 @@ class NerComponent(Component):
 
         tokens_batch = self.get_input("tokens", smem)
 
-        tags_batch = self.get_input("tags", smem)
-
         chars_batch = self.get_input("chars", smem)
+
+        tags_batch = self.get_input("tags", smem)
 
         loss = self.network.train_on_batch(tokens_batch, chars_batch, tags_batch)
 

@@ -80,9 +80,23 @@ class Component(Registrable):
 
     def setup(self, components={}):
         if "init" in self.config:
-            for local_key, ext_key in self.config["init"].items():
-                if ext_key in components:
-                    self._setup[local_key] = components[ext_key]
+            for cmp_name, config in self.config["init"].items():
+                if isinstance(config, dict):
+                    cmp = init_component(config)
+                else:
+                    cfg = read_configuration(config)
+                    cmp = init_component(cfg)
+                if isinstance(cmp, TrainPipeline):
+                    cmp.train({})
+                    cmp.save()
+                    self._setup[cmp_name] = cmp.get_trained_component()
+                else:
+                    cmp.setup()
+                    self._setup[cmp_name] = cmp
+
+            # for local_key, ext_key in self.config["init"].items():
+            #     if ext_key in components:
+            #         self._setup[local_key] = components[ext_key]
 
 
 class DatasetProviderWrapper(Component):

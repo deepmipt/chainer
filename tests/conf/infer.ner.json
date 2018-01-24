@@ -11,27 +11,21 @@
       "out": ["chars"]
     },
     {
-      "id": "tokens_vocab",
-      "component": "vocab",
-      "load": "./tmp/vocabs/ner.tokens.vocab.txt"
-    },
-    {
-      "id": "tags_vocab",
-      "component": "vocab",
-      "load": "./tmp/vocabs/ner.tags.vocab.txt"
-    },
-    {
-      "id": "chars_vocab",
-      "component": "vocab",
-      "load": "./tmp/vocabs/ner.chars.vocab.txt",
-    },
-    {
       "component": "ner",
       "load": "./tmp/models/ner",
       "init": {
-        "tokens_vocab": "tokens_vocab",
-        "tags_vocab": "tags_vocab",
-        "chars_vocab": "chars_vocab",
+        "tokens_vocab": {
+          "component": "vocab",
+          "load": "./tmp/vocabs/ner.tokens.vocab.txt"
+        },
+        "tags_vocab": {
+          "component": "vocab",
+          "load": "./tmp/vocabs/ner.tags.vocab.txt"
+        },
+        "chars_vocab": {
+          "component": "vocab",
+          "load": "./tmp/vocabs/ner.chars.vocab.txt"
+        }
       },
       "in": ["tokens", "chars"],
       "out": ["tags"]

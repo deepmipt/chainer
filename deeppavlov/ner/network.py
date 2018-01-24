@@ -221,7 +221,11 @@ class NerNetwork(TFModel):
                 chars_batch_np[n, k, :len(characters)] = characters
         return tokens_batch_np, chars_batch_np, mask_np, tags_batch_np
 
-    def train_on_batch(self, tokens_idxs_batch, char_idxs_batch, tags_idxs_batch):
+    def train_on_batch(self, tokens_batch, chars_batch, tags_batch):
+        tokens_idxs_batch = self.tokens_vocab.process(tokens_batch)
+        char_idxs_batch = self.chars_vocab.process(chars_batch)
+        tags_idxs_batch = self.chars_vocab.process(tags_batch)
+
         tokens_batch_np, chars_batch_np, mask_np, tags_batch_np = self._prepare_batch(tokens_idxs_batch, char_idxs_batch, tags_idxs_batch)
         if tokens_batch_np is None:
             return None
